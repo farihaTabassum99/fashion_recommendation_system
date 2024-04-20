@@ -7,6 +7,6 @@ Project Run instruction:
 2. Open folder in vs code or ipynb file in jupyter notebook
 3. Open the VS Code terminal and run this command "pip install -r requirements.txt"or Install all libraries in jupyter notebook
 
-4.Run Main_code.ipynb code
+ 4.Run Main_code.ipynb code
 
 
