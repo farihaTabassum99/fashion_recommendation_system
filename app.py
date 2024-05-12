@@ -93,7 +93,32 @@ def fill_null_color(row):
 
 df[['Punjabi Color', 'Shirt Color', 'Saree Color', 'Kamiz Color']] = df.apply(fill_null_color, axis=1)
 
-X = df[['Gender', 'Age', 'Skin Color']]
+
+if 'Occasion' not in df.columns:
+    df['Occasion'] = None  # or any default value you want to use for filling
+if 'Fabric' not in df.columns:
+    df['Fabric'] = None  # or any default value you want to use for filling
+def fill_null_occasion(row):
+    if pd.isnull(row['Occasion']):
+        return random.choice(['Everyday Wear', 'Special Event'])
+    else:
+        return row['Occasion']
+
+# Define function to fill null values for Fabric based on Occasion
+def fill_null_fabric(row):
+    if pd.isnull(row['Fabric']):
+        if row['Occasion'] == 'Everyday Wear':
+            return 'Cotton Types'
+        elif row['Occasion'] == 'Special Event':
+            return 'Gorgeous Types'
+    else:
+        return row['Fabric']
+
+# Apply functions to fill the columns
+df['Occasion'] = df.apply(fill_null_occasion, axis=1)
+df['Fabric'] = df.apply(fill_null_fabric, axis=1)
+
+X = df[['Gender', 'Age', 'Skin Color','Occasion','Fabric']]
 y_clothes = df['Comfortable Clothes']
 
 
@@ -105,7 +130,7 @@ label_encoder = LabelEncoder()
 y_clothes_train_encoded = label_encoder.fit_transform(y_clothes_train)
 y_clothes_test_encoded = label_encoder.transform(y_clothes_test) 
 
-encoder = ce.TargetEncoder(cols=['Gender', 'Age', 'Skin Color'])
+encoder = ce.TargetEncoder(cols=['Gender', 'Age', 'Skin Color','Occasion','Fabric'])
 
 
 X_train_encoded = encoder.fit_transform(X_train, y_clothes_train_encoded)
@@ -155,7 +180,7 @@ for label, clf in classifiers.items():
         accuracies.append(score)
         labels.append(label + " Silhouette Score")
 
-X = df[['Gender', 'Age', 'Skin Color']].copy()
+X = df[['Gender', 'Age', 'Skin Color','Occasion','Fabric']].copy()
 y_clothes = df['Comfortable Clothes']
 
 label_encoder_input = LabelEncoder()
@@ -177,6 +202,12 @@ X['Skin Color'] = label_encoder_skin_color.fit_transform(X['Skin Color'])
 label_encoder_clothes = LabelEncoder()
 y_clothes_encoded = label_encoder_clothes.fit_transform(y_clothes)
 
+label_encoder_Occasion = LabelEncoder()
+X['Occasion'] = label_encoder_Occasion.fit_transform(X['Occasion'])
+
+label_encoder_Fabric = LabelEncoder()
+X['Fabric'] = label_encoder_Fabric.fit_transform(X['Fabric'])
+
 X_train_clothes, X_test_clothes, y_clothes_train, y_clothes_test = train_test_split(X, y_clothes_encoded, test_size=0.2, random_state=42)
 
 knn_classifier_clothes = KNeighborsClassifier()
@@ -188,11 +219,11 @@ def Punjabi_Color(user_input, df):
     if Punjabi_df.empty:
         return "No data available for Punjabi category"
 
-    X = Punjabi_df[['Gender', 'Age', 'Skin Color']]
+    X = Punjabi_df[['Gender', 'Age', 'Skin Color','Occasion','Fabric']]
     y_color = Punjabi_df['Punjabi Color']
 
     label_encoders = {}
-    for column in ['Gender', 'Age', 'Skin Color']:
+    for column in ['Gender', 'Age', 'Skin Color','Occasion','Fabric']:
         label_encoders[column] = LabelEncoder()
         X[column] = label_encoders[column].fit_transform(X[column])
 
@@ -204,7 +235,7 @@ def Punjabi_Color(user_input, df):
 
     input_df = pd.DataFrame(user_input, index=[0])
 
-    for column in ['Gender', 'Age', 'Skin Color']:
+    for column in ['Gender', 'Age', 'Skin Color','Occasion','Fabric']:
         input_df[column] = label_encoders[column].transform([user_input[column]])
 
     color_prediction = knn_classifier_color.predict(input_df)
@@ -216,11 +247,11 @@ def Punjabi_Color(user_input, df):
 
 def Shirt_Color(user_input, df):
     Shirt_df = df[df['Comfortable Clothes'] == 'Shirt']
-    X = Shirt_df[['Gender', 'Age', 'Skin Color']]
+    X = Shirt_df[['Gender', 'Age', 'Skin Color','Occasion','Fabric']]
     y_color = Shirt_df['Shirt Color']
 
     label_encoders = {}
-    for column in ['Gender', 'Age', 'Skin Color']:
+    for column in ['Gender', 'Age', 'Skin Color','Occasion','Fabric']:
         label_encoders[column] = LabelEncoder()
         X[column] = label_encoders[column].fit_transform(X[column])
 
@@ -232,7 +263,7 @@ def Shirt_Color(user_input, df):
 
     input_df = pd.DataFrame(user_input, index=[0])
 
-    for column in ['Gender', 'Age', 'Skin Color']:
+    for column in ['Gender', 'Age', 'Skin Color','Occasion','Fabric']:
         input_df[column] = label_encoders[column].transform([user_input[column]])
 
     color_prediction = knn_classifier_color.predict(input_df)
@@ -242,11 +273,11 @@ def Shirt_Color(user_input, df):
 
 def Kamiz_Color(user_input, df):
     kamiz_df = df[df['Comfortable Clothes'] == 'Salwar Kamiz']
-    X = kamiz_df[['Gender', 'Age', 'Skin Color']]
+    X = kamiz_df[['Gender', 'Age', 'Skin Color','Occasion','Fabric']]
     y_color = kamiz_df['Kamiz Color']
 
     label_encoders = {}
-    for column in ['Gender', 'Age', 'Skin Color']:
+    for column in ['Gender', 'Age', 'Skin Color','Occasion','Fabric']:
         label_encoders[column] = LabelEncoder()
         X[column] = label_encoders[column].fit_transform(X[column])
 
@@ -257,7 +288,7 @@ def Kamiz_Color(user_input, df):
     knn_classifier_color.fit(X, y_color_encoded)
     input_df = pd.DataFrame(user_input, index=[0])
 
-    for column in ['Gender', 'Age', 'Skin Color']:
+    for column in ['Gender', 'Age', 'Skin Color','Occasion','Fabric']:
         input_df[column] = label_encoders[column].transform([user_input[column]])
 
     color_prediction = knn_classifier_color.predict(input_df)
@@ -268,11 +299,11 @@ def Kamiz_Color(user_input, df):
 
 def Saree_Color(user_input, df):
     saree_df = df[df['Comfortable Clothes'] == 'Saree']
-    X = saree_df[['Gender', 'Age', 'Skin Color']]
+    X = saree_df[['Gender', 'Age', 'Skin Color','Occasion','Fabric']]
     y_color = saree_df['Saree Color']
 
     label_encoders = {}
-    for column in ['Gender', 'Age', 'Skin Color']:
+    for column in ['Gender', 'Age', 'Skin Color','Occasion','Fabric']:
         label_encoders[column] = LabelEncoder()
         X[column] = label_encoders[column].fit_transform(X[column])
     label_encoder_color = LabelEncoder()
@@ -282,7 +313,7 @@ def Saree_Color(user_input, df):
     knn_classifier_color.fit(X, y_color_encoded)
     input_df = pd.DataFrame(user_input, index=[0])
 
-    for column in ['Gender', 'Age', 'Skin Color']:
+    for column in ['Gender', 'Age', 'Skin Color','Occasion','Fabric']:
         input_df[column] = label_encoders[column].transform([user_input[column]])
 
     color_prediction = knn_classifier_color.predict(input_df)
@@ -298,13 +329,15 @@ def main():
     user_input['Gender'] = st.selectbox("Select Gender", df['Gender'].unique())
     user_input['Age'] = st.selectbox('Age', df['Age'].unique())
     user_input['Skin Color'] = st.selectbox("Select Skin Color", df['Skin Color'].unique())
+    user_input['Occasion'] = st.selectbox("Select Occasion", df['Occasion'].unique())
+    user_input['Fabric'] = st.selectbox("Select Fabric", df['Fabric'].unique())
 
     def Comfortable_Clothes(user_input, df):
-        X = df[['Gender', 'Age', 'Skin Color']]
+        X = df[['Gender', 'Age', 'Skin Color','Occasion','Fabric']]
         y_clothes = df['Comfortable Clothes']
 
         label_encoders = {}
-        for column in ['Gender', 'Age', 'Skin Color']:
+        for column in ['Gender', 'Age', 'Skin Color','Occasion','Fabric']:
             label_encoders[column] = LabelEncoder()
             X[column] = label_encoders[column].fit_transform(X[column])
 
@@ -316,7 +349,7 @@ def main():
 
         input_df = pd.DataFrame(user_input, index=[0])
 
-        for column in ['Gender', 'Age', 'Skin Color']:
+        for column in ['Gender', 'Age', 'Skin Color','Occasion','Fabric']:
             input_df[column] = label_encoders[column].transform([user_input[column]])
 
         clothes_prediction = knn_classifier_clothes.predict(input_df)
